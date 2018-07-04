@@ -5,10 +5,9 @@ import mycity.intents.intent_constants as intent_constants
 import mycity.utilities.google_maps_utils as g_maps_utils
 from mycity.utilities.finder.FinderCSV import FinderCSV
 from mycity.mycity_response_data_model import MyCityResponseDataModel
+import logging
 
-
-
-
+logger = logging.getLogger(__name__)
 
 # Constants 
 PARKING_INFO_URL = ("http://bostonopendata-boston.opendata.arcgis.com/datasets/"
@@ -32,10 +31,11 @@ def format_record_fields(record):
         fields from the closest record
     :return: None
     """
+    logger.debug('record: ' + str(record))
     record["Phone"] = "Call {} for information.".format(record["Phone"]) \
         if record["Phone"].strip() != "" else ""
     record["Fee"] = " The fee is {}. ".format(record["Fee"]) \
-        if record["Fee"] != "No Charge" else " There is no fee. "   
+        if record["Fee"] != "No Charge" else " There is no fee. "
 
 
 def get_snow_emergency_parking_intent(mycity_request):
@@ -45,22 +45,22 @@ def get_snow_emergency_parking_intent(mycity_request):
     :param mycity_request: MyCityRequestDataModel object
     :return: MyCityResponseDataModel object
     """
-    print(
-        '[method: get_snow_emergency_parking_intent]',
-        'MyCityRequestDataModel received:',
-        str(mycity_request)
-    )
+    logger.debug('MyCityRequestDataModel received:' + str(mycity_request))
 
     mycity_response = MyCityResponseDataModel()
     if intent_constants.CURRENT_ADDRESS_KEY in mycity_request.session_attributes:
         finder = FinderCSV(mycity_request, PARKING_INFO_URL, ADDRESS_KEY, 
                            OUTPUT_SPEECH_FORMAT, format_record_fields)
-        print("Finding snow emergency parking for {}".format(finder.origin_address))
+        
+        logger.debug(
+            "Finding snow emergency parking for {}".format(finder.origin_address)
+        )
+        
         finder.start()
         mycity_response.output_speech = finder.get_output_speech()
 
     else:
-        print("Error: Called snow_parking_intent with no address")
+        logger.debug("Error: Called snow_parking_intent with no address")
         mycity_response.output_speech = "I need a valid address to find the closest parking"
 
     # Setting reprompt_text to None signifies that we do not want to reprompt

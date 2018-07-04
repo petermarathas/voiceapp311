@@ -2,7 +2,6 @@
 Tools to package and deploy the lambda function for the mycity voice app.
 """
 
-from __future__ import print_function
 from subprocess import run, PIPE
 import argparse
 import os

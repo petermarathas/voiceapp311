@@ -4,8 +4,6 @@ Controller for mycity voice app.
 This class handles all voice requests.
 """
 
-from __future__ import print_function
-from mycity.mycity_request_data_model import MyCityRequestDataModel
 from mycity.mycity_response_data_model import MyCityResponseDataModel
 from .intents.user_address_intent import set_address_in_session, \
     get_address_from_session, request_user_address_response, \
@@ -15,9 +13,9 @@ from .intents.unhandled_intent import unhandled_intent
 from .intents.get_alerts_intent import get_alerts_intent
 from .intents.snow_parking_intent import get_snow_emergency_parking_intent
 from .intents import intent_constants
+import logging
 
-
-LOG_CLASS = '\n\n[class: MyCityController]'
+logger = logging.getLogger(__name__)
 
 
 def execute_request(mycity_request):
@@ -28,12 +26,9 @@ def execute_request(mycity_request):
     :param mycity_request: MyCityRequestDataModel object
     :return: MyCityRequestDataModel object corresponding to the request_type
     """
-    print(
-        LOG_CLASS,
-        '[method: main]',
-        'MyCityRequestDataModel received:\n',
-        str(mycity_request)
-    )
+    # NOTE: The logger should be configured in the entry point from the
+    #       platform (e.g., lambda_function for Alexa)
+    logger.debug('Beginning request execution.')
 
     # TODO: This section should be generalized for all platforms if possible
     """
@@ -64,18 +59,7 @@ def on_session_started(mycity_request):
     :param mycity_request: MyCityRequestDataModel object
     :return: None
     """
-    print(
-        LOG_CLASS,
-        '[method: on_session_started]',
-        '[requestId: ' + str(mycity_request.request_id) + ']',
-        '[sessionId: ' + str(mycity_request.session_id) + ']',
-        (
-            '[request object: ' + str(mycity_request) + ']' if
-            isinstance(mycity_request, MyCityRequestDataModel) else
-            '[request object: ' +
-            'ERROR - request should be a MyCityRequestDataModel.]'
-        )
-    )
+    logger.debug('Request object: ' + str(mycity_request))
     return get_address_from_user_device(mycity_request)
 
 
@@ -89,12 +73,7 @@ def on_launch(mycity_request):
     :return: MyCityResponseDataModel object that will initiate a welcome
         process on the user's device
     """
-    print(
-        LOG_CLASS,
-        '[method: on_launch]',
-        '[requestId: ' + str(mycity_request.request_id) + ']',
-        '[sessionId: ' + str(mycity_request.session_id) + ']'
-    )
+    logger.debug('')
 
     # Dispatch to your skill's launch
     return get_welcome_response(mycity_request)
@@ -113,13 +92,7 @@ def on_intent(mycity_request):
     :raises: ValueError
     """
 
-    print(
-        LOG_CLASS,
-        '[method: on_intent]',
-        '[intent: ' + mycity_request.intent_name + ']',
-        'MyCityRequestDataModel received:',
-        mycity_request
-    )
+    logger.debug('MyCityRequestDataModel received:' + str(mycity_request))
 
     if mycity_request.intent_name == "SetAddressIntent":
         set_address_in_session(mycity_request)
@@ -171,12 +144,8 @@ def on_session_ended(mycity_request):
     :return: MyCityResponseDataModel object containing a clean instance
         of the response datamodel
     """
-    print(
-        LOG_CLASS,
-        '[method: on_session_ended]',
-        'MyCityRequestDataModel received:',
-        str(mycity_request)
-    )
+    logger.debug('MyCityRequestDataModel received:' + str(mycity_request))
+    
     return MyCityResponseDataModel()
     # add cleanup logic here
 
@@ -190,10 +159,7 @@ def get_help_response(mycity_request):
     :return: MyCityResponseDataModel object that will initiate
         a help process on the user's device
     """
-    print(
-        LOG_CLASS,
-        '[method: get_help_response]'
-    )
+    logger.debug('')
     mycity_response = MyCityResponseDataModel()
     mycity_response.session_attributes = mycity_request.session_attributes
     mycity_response.card_title = "Help"
@@ -224,10 +190,7 @@ def get_welcome_response(mycity_request):
     :return: MyCityResponseDataModel object that will initiate
         a welcome process on the user's device
     """
-    print(
-        LOG_CLASS,
-        '[method: get_welcome_response]'
-    )
+    logger.debug('')
     mycity_response = MyCityResponseDataModel()
     mycity_response.session_attributes = mycity_request.session_attributes
     mycity_response.card_title = "Welcome"
@@ -252,6 +215,7 @@ def handle_session_end_request(mycity_request):
     :param mycity_request: MyCityRequestDataModel object
     :return: MyCityResponseDataModel object that will end a user's session
     """
+    logger.debug('Closing')
     mycity_response = MyCityResponseDataModel()
     mycity_response.session_attributes = mycity_request.session_attributes
     mycity_response.card_title = "Boston Info - Thanks"

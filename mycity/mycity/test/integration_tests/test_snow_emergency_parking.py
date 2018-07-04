@@ -46,7 +46,7 @@ class SnowEmergencyTestCase(mix_ins.RepromptTextTestMixIn,
         self.get_driving_info_patch = \
             mock.patch(
                 ('mycity.intents.snow_parking_intent.g_maps_utils'
-                 '._get_driving_info'),
+                 '.get_driving_info'),
                 return_value=mock_get_driving_info_return
             )
         self.mock_filtered_record.start()

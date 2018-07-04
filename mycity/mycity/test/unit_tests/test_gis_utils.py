@@ -8,7 +8,7 @@ import mycity.utilities.google_maps_utils as g_maps_utils
 class GISUtilitiesTestCase(base.BaseTestCase):
 
     @mock.patch(
-        'mycity.utilities.google_maps_utils._get_driving_info',
+        'mycity.utilities.google_maps_utils.get_driving_info',
         return_value=test_constants.GOOGLE_MAPS_JSON
     )
     def test_get_closest_feature(self, mock_get_driving_info):

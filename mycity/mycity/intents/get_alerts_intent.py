@@ -20,6 +20,10 @@ from bs4 import BeautifulSoup
 from urllib import request
 from enum import Enum
 from mycity.mycity_response_data_model import MyCityResponseDataModel
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Services(Enum):
     
@@ -54,17 +58,15 @@ def get_alerts_intent(mycity_request):
     :param mycity_request: MyCityRequestDataModel object
     :return: MyCityResponseDataModel object
     """
-    print(
-        '[method: get_alerts_intent]',
-        'MyCityRequestDataModel received:\n',
-        str(mycity_request)
-    )
+    logger.debug('MyCityRequestDataModel received:\n' + str(mycity_request))
 
     mycity_response = MyCityResponseDataModel()
     alerts = get_alerts()
-    print("[dictionary with alerts scraped from boston.gov]:\n" + str(alerts))
+    logger.debug("[dictionary with alerts scraped from boston.gov]:\n" + str(alerts))
+
     alerts = prune_normal_responses(alerts)
-    print("[dictionary after pruning]:\n" + str(alerts))
+    logger.debug("[dictionary after pruning]:\n" + str(alerts))
+
     mycity_response.session_attributes = mycity_request.session_attributes
     mycity_response.card_title = "City Alerts"
     mycity_response.reprompt_text = None
@@ -83,12 +85,14 @@ def alerts_to_speech_output(alerts):
     :return: a string containing all alerts, or if no alerts are
         found, a message indicating there are no alerts at this time
     """
+    logger.debug('alerts: ' + str(alerts))
     all_alerts = ""
     if Services.ALERT_HEADER.value in all_alerts:
         all_alerts += alerts.pop(Services.ALERT_HEADER.value)
     for alert in alerts.values():
         all_alerts += alert + ' '
-    if all_alerts.strip() == "":        # this is a kludgy fix for the {'alert header': ''} bug 
+    if all_alerts.strip() == "":
+        # this is a kludgy fix for the {'alert header': ''} bug
         return "There are no alerts. City services are running on normal schedules."       
     else:
         return all_alerts
@@ -105,7 +109,7 @@ def prune_normal_responses(service_alerts):
     :return: pruned alert dictionary containing only the current
         alert information
     """
-
+    logger.debug('service_alerts: ' + str(service_alerts))
     tow_lot_normal_message = "The tow lot is open from 7 a.m. - 11 p.m. "
     tow_lot_normal_message += "Automated kiosks are available 24 hours a day, "
     tow_lot_normal_message += "seven days a week for vehicle releases."
@@ -127,6 +131,8 @@ def get_alerts():
     
     :return: a dictionary that maps alert names to detailed alert message
     """
+    logger.debug('')
+
     # get boston.gov as an httpResponse object
     url = request.urlopen(BOSTON_GOV)
     # feed the url object into beautiful soup
